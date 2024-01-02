@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MushBoom</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body{
+            margin: 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+        var config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 200 },
+                    debug: false
+                }
+        },
+            backgroundColor: 'linear-gradient',
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+        
+        }
+
+
+        //variables & functions
+        var player2;
+        var player;
+        var island;
+        var cursors;
+        var keys;
+        var enemy
+        
+
+        var game = new Phaser.Game(config);
+
+        function preload ()
+        {
+            this.load.image('sky', "GAMEimg/sky.png")
+            this.load.image('sun', "GAMEimg/sun.png")
+            this.load.image('cloud1', 'GAMEimg/cloud1.png')
+            this.load.image('cloud2', 'GAMEimg/cloud2.png')
+            this.load.image('cloud3', 'GAMEimg/cloud3.png')
+            this.load.image('cloud4', 'GAMEimg/cloud4.png')
+            this.load.image('cloud5', 'GAMEimg/cloud5.png')
+            this.load.image('cloud6', 'GAMEimg/cloud6.png')
+            this.load.image('cloud7', 'GAMEimg/cloud7.png')
+            this.load.image('cloud8', 'GAMEimg/cloud8.png')
+            this.load.image('ball', 'GAMEimg/enemies/bowlingBall.png')
+            this.load.image('coconut', 'GAMEimg/enemies/coconut.png')
+            this.load.image('rock', 'GAMEimg/enemies/rock.png')
+            this.load.image('watermelon', 'GAMEimg/enemies/watermelon.png')
+            
+            this.load.image('island', 'GAMEimg/island.png')
+
+            this.load.spritesheet('tansy', 'GAMEimg/tansy.png', { frameWidth: 61, frameHeight: 28 });
+            this.load.spritesheet('blewit', 'GAMEimg/blewit.png', { frameWidth: 61, frameHeight: 28 });
+        }
+            
+        function create ()
+        {
+            this.add.image(400, 300, 'sky')
+            this.add.image(400, 130, 'sun').setScale(.13)
+
+            enemy = this.physics.add.group()
+            var fallingItems = ['ball', 'coconut', 'rock', 'watermelon']
+
+            this.time.addEvent({
+                delay: 400,
+                callback: ()=>{
+                    // spawn a new apple
+                    for (var i =0; i < 1; i++)
+                        {
+                            enemy.create(Phaser.Math.RND.between(20, 780), 0, Phaser.Math.RND.pick(fallingItems));
+                        }
+                },
+                loop: true
+            })
+
+
+
+            this.add.image(100, 40, 'cloud1')
+            this.add.image(250, 40, 'cloud2')
+            this.add.image(350, 40, 'cloud3')
+            this.add.image(820, 40, 'cloud4')
+            this.add.image(580, 40, 'cloud3')
+            this.add.image(500, 40, 'cloud5')
+            this.add.image(600, 40, 'cloud6')
+            this.add.image(800, 40, 'cloud6')
+            this.add.image(170, 40, 'cloud7')
+            this.add.image(420, 40, 'cloud8')
+
+
+            island = this.physics.add.staticGroup();
+            island.create(400, 500, 'island').setScale(1.65).refreshBody();
+
+            player = this.physics.add.sprite(431, 350, 'tansy');
+            this.physics.add.collider(player, island);
+
+            player.setBounce(0.15);
+            player.setCollideWorldBounds(false);
+
+            this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('tansy', { start: 0, end: 3 }),
+            frameRate: 12,
+            repeat: -1
+            });
+            this.anims.create({
+                key: 'turn',
+                frames: [ { key: 'tansy', frame: 4 } ],
+                frameRate: 20
+            });
+            this.anims.create({
+                key: 'right',
+                frames: this.anims.generateFrameNumbers('tansy', { start: 5, end: 8 }),
+                frameRate: 15,
+                repeat: 1
+            });
+            cursors = this.input.keyboard.createCursorKeys();
+
+            //p2
+
+            player2 = this.physics.add.sprite(369, 350, 'blewit');
+            this.physics.add.collider(player2, island);
+
+            player2.setBounce(0.15);
+            player2.setCollideWorldBounds(false);
+            this.anims.create({
+            key: 'left2',
+            frames: this.anims.generateFrameNumbers('blewit', { start: 0, end: 3 }),
+            frameRate: 12,
+            repeat: -1
+            });
+            this.anims.create({
+                key: 'turn2',
+                frames: [ { key: 'blewit', frame: 4 } ],
+                frameRate: 20
+            });
+            this.anims.create({
+                key: 'right2',
+                frames: this.anims.generateFrameNumbers('blewit', { start: 5, end: 8 }),
+                frameRate: 12,
+                repeat: 1
+            });
+            keys = this.input.keyboard.addKeys("W,A,S,D");
+            this.physics.add.collider(player, player2);
+            gamer = player, player2;
+
+
+            
+            this.physics.add.collider(player, enemy, hitEnemy, null, this)
+            this.physics.add.collider(player2, enemy, hitEnemy, null, this)
+        }
+
+        function update ()
+        {
+            if (cursors.left.isDown)
+        {
+            player.setVelocityX(-180);
+
+            player.anims.play('left', true);
+        }
+        else if (cursors.right.isDown)
+        {
+            player.setVelocityX(180);
+
+            player.anims.play('right', true);
+        }
+        else
+        {
+            player.setVelocityX(0);
+
+            player.anims.play('turn');
+        }
+
+        if (cursors.up.isDown && player.body.touching.down)
+        {
+            player.setVelocityY(-155);
+        }
+        
+//////////////////////////////////////
+        
+
+        if (keys.A.isDown) {
+            player2.setVelocityX(-180);
+            player2.anims.play('left2', true);
+        } 
+        else if (keys.D.isDown) {
+            player2.setVelocityX(180);
+            player2.anims.play('right2', true);
+        }
+        else {
+            player2.setVelocityX(0);
+
+            player2.anims.play('turn2');
+        }
+
+        if (keys.W.isDown && player2.body.touching.down) {
+            player2.setVelocityY(-155);
+        }
+    }
+    function hitEnemy(gamer, enemy){
+        this.physics.pause();
+        gamer.setTint(0xff0000);
+        
+    }
+    </script>
+</body>
+</html>
