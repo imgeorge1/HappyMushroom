@@ -41,7 +41,11 @@
         var island;
         var cursors;
         var keys;
-        var enemy
+        var enemy;
+        var score = 0;
+        var scoreText;
+        var gameOver = false;   
+
         
 
         var game = new Phaser.Game(config);
@@ -77,17 +81,26 @@
             enemy = this.physics.add.group()
             var fallingItems = ['ball', 'coconut', 'rock', 'watermelon']
 
-            this.time.addEvent({
-                delay: 400,
-                callback: ()=>{
-                    // spawn a new apple
-                    for (var i =0; i < 1; i++)
-                        {
-                            enemy.create(Phaser.Math.RND.between(20, 780), 0, Phaser.Math.RND.pick(fallingItems));
-                        }
-                },
-                loop: true
-            })
+            // this.time.addEvent({
+            //     delay: 400,
+            //     callback: ()=>{
+            //         // spawn a new enemy
+            //             for (var i =0; i < 1; i++)
+            //             {
+            //                 enemy.create(Phaser.Math.RND.between(20, 780), 0, Phaser.Math.RND.pick(fallingItems));
+            //             }
+            //     },
+            //     loop: true,
+            // })
+
+            function intervalFunction(){
+            setInterval(function(){
+                enemy.create(Phaser.Math.RND.between(20, 780), 0, Phaser.Math.RND.pick(fallingItems));
+                score += 1;
+                scoreText.setText('Score: ' + score);
+            }, 400)}
+
+            intervalFunction()
 
 
 
@@ -103,6 +116,8 @@
             this.add.image(420, 40, 'cloud8')
 
 
+            
+
             island = this.physics.add.staticGroup();
             island.create(400, 500, 'island').setScale(1.65).refreshBody();
 
@@ -111,6 +126,9 @@
 
             player.setBounce(0.15);
             player.setCollideWorldBounds(false);
+
+            scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+            scoreText.setDepth(1);
 
             this.anims.create({
             key: 'left',
@@ -167,6 +185,7 @@
 
         function update ()
         {
+        
             if (cursors.left.isDown)
         {
             player.setVelocityX(-180);
@@ -191,7 +210,7 @@
             player.setVelocityY(-155);
         }
         
-//////////////////////////////////////
+            //p2
         
 
         if (keys.A.isDown) {
@@ -211,11 +230,12 @@
         if (keys.W.isDown && player2.body.touching.down) {
             player2.setVelocityY(-155);
         }
+        
     }
     function hitEnemy(gamer, enemy){
-        this.physics.pause();
         gamer.setTint(0xff0000);
-        
+        this.intervalFunction.pause();
+        gameOver = true;
     }
     </script>
 </body>
